@@ -9,7 +9,7 @@ I developed Śārṅga to deepen my understanding of cryptography and security p
 - Output can be stored safely without worrying about unauthorized access.
 - Minimalistic and responsive design for smooth user experience.
 
-## Śārṅga Cipher Algorithm 
+## Śārṅga Algorithm 
 **This table represents the structure of my high-security Śārṅga Cipher Algorithm, which combines custom prefixes and binary encoding to encrypt text securely.**
 
 | Prefix | Type            | Bits             | Example        |
