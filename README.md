@@ -1,5 +1,6 @@
 ## What is Śārṅga ?
-Śārṅga is a encryption and decryption tool. It implements a high-security cipher algorithm designed by Shaivarth, capable of converting plaintext into a secure encrypted binary form and back. The interface is interactive, minimalistic.
+Śārṅga is a encryption and decryption tool. It implements a high-security cipher algorithm designed by Shaivarth, capable of converting plaintext into a secure encrypted binary form and back. Designed and implemented a custom cipher algorithm using fixed-length binary encoding with unique prefixes for lowercase, uppercase, digits, and symbols—aimed at reducing pattern recognition and resisting brute-force attempts.<br><br>
+I developed Śārṅga to deepen my understanding of cryptography and security principles. By designing a custom cipher from scratch, I explored how encoding, prefixing, and binary representations can be used to resist common attacks such as brute force and frequency analysis. This hands-on project allowed me to combine theoretical cryptography with practical implementation. The project remains experimental and educational, and my goal is to continue improving it while also benchmarking it against established algorithms to sharpen my research and development skills in cybersecurity.
 
 ## Features :
 
