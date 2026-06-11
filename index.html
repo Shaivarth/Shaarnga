@@ -4,69 +4,721 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Śārṅga</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:       #c9a227;
+      --gold-pale:  #e8d5a3;
+      --gold-dim:   #7a6018;
+      --gold-glow:  rgba(201,162,39,0.18);
+      --bg:         #080808;
+      --surface:    #111111;
+      --surface2:   #191919;
+      --border:     #2a2218;
+      --border-gold:#3d3118;
+      --text-muted: #5a5040;
+      --text-mid:   #8a7850;
+      --red-err:    #c0392b;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--gold-pale);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND BINARY RAIN ── */
+    #rain-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.045;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,0.9);
+      backdrop-filter: blur(8px);
+    }
+
+    .logo-name {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--gold-pale);
+    }
+    .logo-name .deva {
+      font-size: 11px;
+      color: var(--text-mid);
+      letter-spacing: 0.05em;
+      margin-left: 6px;
+    }
+
+    .logo-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .bow-svg {
+      width: 52px;
+      height: 28px;
+      opacity: 0.75;
+    }
+
+    .nav-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--gold-pale); }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - 57px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ── LANDING ── */
+    #landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #landing.hidden {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+    }
+
+    .hero-glyph {
+      margin-bottom: 36px;
+    }
+
+    .welcome-label {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel', serif;
+      font-size: 42px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--gold-pale);
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+
+    .hero-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      margin-bottom: 52px;
+    }
+
+    .choice-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .choice-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 13px 36px;
+      background: transparent;
+      color: var(--gold-pale);
+      border: 1px solid var(--border-gold);
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .choice-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold-glow);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .choice-btn:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+    .choice-btn:hover::before { opacity: 1; }
+    .choice-btn:active { transform: scale(0.98); }
+
+    /* ── CIPHER PANEL ── */
+    #panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    #panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .mode-label {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+    .mode-title {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--gold-pale);
+      margin-top: 2px;
+    }
+
+    .back-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .back-btn:hover { color: var(--gold-pale); }
+    .back-btn svg { width: 14px; height: 14px; opacity: 0.7; }
+
+    /* ── INPUT AREA ── */
+    .field-wrapper {
+      width: 100%;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--gold-pale);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.7;
+      padding: 16px 18px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      display: block;
+    }
+    textarea:focus { border-color: var(--gold-dim); }
+    textarea::placeholder { color: var(--text-muted); }
+    textarea[readonly] {
+      cursor: default;
+      color: var(--gold);
+    }
+
+    #input { height: 120px; }
+    #output { height: 120px; }
+
+    /* ── ACTION ROW ── */
+    .action-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .run-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 12px 40px;
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .run-btn:hover {
+      background: var(--gold-glow);
+      color: var(--gold-pale);
+      border-color: var(--gold);
+    }
+    .run-btn:active { transform: scale(0.98); }
+    .run-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .copy-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .copy-btn:hover { color: var(--gold-pale); }
+    .copy-btn svg { width: 13px; height: 13px; }
+
+    /* ── BIT STREAM ANIMATION ── */
+    #stream-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      display: none;
+    }
+
+    .stream-char {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--gold);
+      pointer-events: none;
+    }
+
+    /* ── RESULT SECTION ── */
+    #result-section {
+      display: none;
+      width: 100%;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+      position: relative;
+    }
+    .divider::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg);
+      padding: 0 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+    }
+
+    .error-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--red-err);
+      letter-spacing: 0.05em;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+
+    /* ── DIVIDER LINES ── */
+    .panel-line {
+      width: 40px;
+      height: 1px;
+      background: var(--border-gold);
+      margin: 0 auto 32px;
+    }
+
+    /* ── COPY FLASH ── */
+    @keyframes flashGold {
+      0%   { color: var(--gold); }
+      50%  { color: var(--gold-pale); }
+      100% { color: var(--text-muted); }
+    }
+    .copy-flash { animation: flashGold 0.6s ease forwards; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hero-title { font-size: 32px; }
+      #panel { max-width: 100%; }
+      header { padding: 12px 18px; }
+    }
+  </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo">
-      Śārṅga (शार्ङ्ग)
-    </div>
-    <div class="logo-center">
-      <img src="Images/bow.png" alt="Logo">
-    </div>
-    <div class="nav">
-        <a href="https://shaivarth.github.io/Portfolio-Website/" target="_blank">About Me</a>
-    </div>
-  </header>
-  
+<canvas id="rain-canvas"></canvas>
 
-  <div class="container">
-<div id="animation" style="margin-bottom:1px; text-align:center;">
-  <svg viewBox="0 0 200 100" width="100" height="150">
-    <path d="M10,50 C10,10 90,10 100,50 
-             C110,90 190,90 190,50 
-             C190,10 110,10 100,50 
-             C90,90 10,90 10,50"
-          fill="none"
-          stroke="white"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-dasharray="110 350"
-          stroke-dashoffset="300"
-          opacity="0.9">
-      <animate attributeName="stroke-dashoffset"
-               from="200" to="-200"
-               dur="1s"
-               repeatCount="indefinite" />
-    </path>
-  </svg>
-</div>
-    <div class="choice" id="choice">
-      <h2 style="color:white; font-weight:normal; margin-bottom:25px;">
-        Welcome to <b>Śārṅga</b>.
-      </h2>
-      <button onclick="showBox('encrypt')">Encrypt</button>
-      <button onclick="showBox('decrypt')">Decrypt</button>
+<div id="stream-overlay"></div>
+
+<header>
+  <div class="logo-name">
+    Śārṅga<span class="deva">शार्ङ्ग</span>
+  </div>
+  <div class="logo-center">
+    <svg class="bow-svg" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5,25 C5,5 45,2 50,25 C55,48 95,45 95,25"
+        stroke="#c9a227" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <line x1="5" y1="25" x2="95" y2="25" stroke="#3d3118" stroke-width="0.8"/>
+    </svg>
+  </div>
+  <a class="nav-link" href="https://shaivarth.github.io/Portfolio-Website/" target="_blank">About</a>
+</header>
+
+<main>
+  <!-- LANDING -->
+  <div id="landing">
+    <div class="hero-glyph">
+      <svg viewBox="0 0 120 60" width="120" height="60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10,30 C10,5 50,2 60,30 C70,58 110,55 110,30 C110,5 70,2 60,30 C50,58 10,55 10,30"
+          stroke="#c9a227" stroke-width="1.5" stroke-linecap="round" fill="none"
+          stroke-dasharray="80 350">
+          <animate attributeName="stroke-dashoffset" from="200" to="-200"
+            dur="2.5s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="60" cy="30" r="2.5" fill="#c9a227" opacity="0.6">
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
     </div>
 
-<div class="box" id="box">
-  <div id="inputSection">
-    <textarea id="input" rows="4" placeholder="Enter text"></textarea>
-    <div>
-      <button class="action-btn" id="mainBtn"></button>
-      <button class="action-btn" onclick="goBack()">Back</button>
+    <p class="welcome-label">Binary cipher</p>
+    <h1 class="hero-title">Śārṅga</h1>
+    <p class="hero-sub">// custom encoding schema · v1.0</p>
+
+    <div class="choice-row">
+      <button class="choice-btn" onclick="showPanel('encrypt')">Encrypt</button>
+      <button class="choice-btn" onclick="showPanel('decrypt')">Decrypt</button>
     </div>
   </div>
 
-  <div id="resultSection" style="display:none;">
-    <textarea id="output" rows="4" placeholder="Result" readonly></textarea>
-    <div>
-      <button class="action-btn" onclick="goBack()">Back</button>
+  <!-- CIPHER PANEL -->
+  <div id="panel">
+    <div class="panel-header">
+      <div>
+        <p class="mode-label">Mode</p>
+        <p class="mode-title" id="mode-title">Encrypt</p>
+      </div>
+      <button class="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M19 12H5M5 12l7 7M5 12l7-7"/>
+        </svg>
+        Back
+      </button>
+    </div>
+
+    <!-- INPUT -->
+    <div class="field-wrapper">
+      <label class="field-label" for="input">Input</label>
+      <textarea id="input" placeholder="Enter text to process…" spellcheck="false"></textarea>
+    </div>
+    <div class="action-row">
+      <button class="run-btn" id="run-btn" onclick="runCipher()">Run</button>
+      <span class="error-msg" id="error-msg"></span>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result-section">
+      <div class="divider" data-label="output"></div>
+      <div class="field-wrapper">
+        <label class="field-label" for="output">Result</label>
+        <textarea id="output" readonly spellcheck="false"></textarea>
+      </div>
+      <div class="action-row">
+        <button class="copy-btn" id="copy-btn" onclick="copyOutput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="1"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Copy
+        </button>
+        <button class="run-btn" onclick="resetPanel()" style="padding:10px 24px; font-size:11px;">Clear</button>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
-  <script src="script.js"></script>
+<script>
+/* ── BINARY RAIN BACKGROUND ── */
+(function() {
+  const canvas = document.getElementById('rain-canvas');
+  const ctx = canvas.getContext('2d');
+  let cols, drops;
+  function init() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols = Math.floor(canvas.width / 18);
+    drops = Array.from({length: cols}, () => Math.random() * -100);
+  }
+  function draw() {
+    ctx.fillStyle = 'rgba(8,8,8,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#c9a227';
+    ctx.font = '11px JetBrains Mono, monospace';
+    drops.forEach((y, i) => {
+      const bit = Math.random() > 0.5 ? '1' : '0';
+      ctx.fillText(bit, i * 18, y * 18);
+      if (y * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i] += 0.4;
+    });
+  }
+  init();
+  window.addEventListener('resize', init);
+  setInterval(draw, 55);
+})();
+
+/* ── STATE ── */
+let currentMode = '';
+
+/* ── ENCRYPTION / DECRYPTION ── */
+function encryptText(text) {
+  const bits = [];
+  for (const ch of text) {
+    if (/[a-z]/.test(ch)) {
+      bits.push('00' + (ch.charCodeAt(0) - 96).toString(2).padStart(5, '0'));
+    } else if (/[A-Z]/.test(ch)) {
+      bits.push('11' + (ch.charCodeAt(0) - 64).toString(2).padStart(5, '0'));
+    } else if (/[0-9]/.test(ch)) {
+      bits.push('01' + parseInt(ch).toString(2).padStart(4, '0'));
+    } else {
+      bits.push('10' + ch.charCodeAt(0).toString(2).padStart(8, '0'));
+    }
+  }
+  return bits.join('');
+}
+
+function decryptText(bin) {
+  let i = 0;
+  const out = [];
+  while (i < bin.length) {
+    const t = bin.slice(i, i + 2); i += 2;
+    if (t === '00') {
+      out.push(String.fromCharCode(96 + parseInt(bin.slice(i, i + 5), 2))); i += 5;
+    } else if (t === '11') {
+      out.push(String.fromCharCode(64 + parseInt(bin.slice(i, i + 5), 2))); i += 5;
+    } else if (t === '01') {
+      out.push(parseInt(bin.slice(i, i + 4), 2).toString()); i += 4;
+    } else if (t === '10') {
+      out.push(String.fromCharCode(parseInt(bin.slice(i, i + 8), 2))); i += 8;
+    } else {
+      throw new Error('Invalid binary sequence');
+    }
+  }
+  return out.join('');
+}
+
+/* ── BIT STREAM ANIMATION ── */
+function animateBitStream(inputEl, callback) {
+  const rect = inputEl.getBoundingClientRect();
+  const overlay = document.getElementById('stream-overlay');
+  overlay.style.display = 'block';
+  overlay.innerHTML = '';
+
+  const text = inputEl.value;
+  const charCount = Math.min(text.length, 40);
+  const fragments = [];
+
+  for (let i = 0; i < charCount; i++) {
+    const span = document.createElement('span');
+    span.className = 'stream-char';
+    span.textContent = text[i];
+    const col = (i % 20) / 20;
+    const row = Math.floor(i / 20) / 2;
+    span.style.left = (rect.left + col * rect.width) + 'px';
+    span.style.top  = (rect.top + row * 30 + 16) + 'px';
+    span.style.opacity = '1';
+    span.style.transition = `transform ${0.4 + Math.random() * 0.3}s ease, opacity 0.4s ease`;
+    overlay.appendChild(span);
+    fragments.push(span);
+  }
+
+  requestAnimationFrame(() => {
+    fragments.forEach((s, idx) => {
+      const angle = (Math.random() - 0.5) * 360;
+      const dist  = 60 + Math.random() * 120;
+      s.textContent = Math.random() > 0.5 ? '1' : '0';
+      s.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0.3)`;
+      s.style.opacity = '0';
+    });
+  });
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.innerHTML = '';
+    callback();
+  }, 500);
+}
+
+/* ── PANEL TRANSITIONS ── */
+function showPanel(mode) {
+  currentMode = mode;
+  const landing = document.getElementById('landing');
+  const panel   = document.getElementById('panel');
+
+  landing.classList.add('hidden');
+  setTimeout(() => {
+    landing.style.display = 'none';
+    document.getElementById('mode-title').textContent =
+      mode === 'encrypt' ? 'Encrypt' : 'Decrypt';
+    document.getElementById('run-btn').textContent =
+      mode === 'encrypt' ? 'Encrypt' : 'Decrypt';
+    panel.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => panel.classList.add('visible'));
+    });
+  }, 400);
+}
+
+function goBack() {
+  const panel   = document.getElementById('panel');
+  const landing = document.getElementById('landing');
+  panel.classList.remove('visible');
+  setTimeout(() => {
+    panel.style.display = 'none';
+    resetPanel();
+    landing.style.display = 'flex';
+    landing.classList.remove('hidden');
+  }, 450);
+}
+
+function resetPanel() {
+  document.getElementById('input').value  = '';
+  document.getElementById('output').value = '';
+  document.getElementById('error-msg').textContent = '';
+  document.getElementById('result-section').style.display = 'none';
+}
+
+function runCipher() {
+  const input = document.getElementById('input').value.trim();
+  const errEl = document.getElementById('error-msg');
+  errEl.textContent = '';
+
+  if (!input) {
+    errEl.textContent = '// no input provided';
+    return;
+  }
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+
+  animateBitStream(document.getElementById('input'), () => {
+    try {
+      const result = currentMode === 'encrypt'
+        ? encryptText(input)
+        : decryptText(input);
+
+      document.getElementById('output').value = result;
+      const rs = document.getElementById('result-section');
+      rs.style.display = 'block';
+
+      // type-in effect for output
+      const outEl = document.getElementById('output');
+      outEl.value = '';
+      let i = 0;
+      const speed = result.length > 200 ? 2 : result.length > 80 ? 4 : 8;
+      const interval = setInterval(() => {
+        const chunk = Math.min(speed, result.length - i);
+        outEl.value += result.slice(i, i + chunk);
+        i += chunk;
+        if (i >= result.length) clearInterval(interval);
+      }, 12);
+
+    } catch (e) {
+      errEl.textContent = '// ' + (e.message || 'invalid input');
+    }
+    btn.disabled = false;
+  });
+}
+
+function copyOutput() {
+  const val = document.getElementById('output').value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied`;
+    btn.classList.add('copy-flash');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-flash'); }, 1800);
+  });
+}
+
+/* ── ENTER KEY SHORTCUT ── */
+document.getElementById('input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runCipher();
+});
+</script>
 </body>
 </html>
